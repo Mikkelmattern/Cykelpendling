@@ -4,22 +4,39 @@ public class GameState {
     int startMonth;
 
     public void run() {
-        doContinue();
+        while (true) {
+            calcAmount();
+            if (!loopYesNo()) {
+                break;
+            }
+
+
+        }
+        calcSession();
     }
 
-    public boolean continueRegister() {
-        textUI.displayMsg("Klimarabat for " + bc.getCurrentMonth() + ": " + String.valueOf(bc.getTotalAmount())+ "kr");
-        String choice = textUI.stringInput("Fortsæt registrering? (J/N)");
-        char cleanChoice = choice.toUpperCase().charAt(0);
-        switch (cleanChoice) {
-            case 'J':
-                doContinue();
-            case 'N':
-                return calcSession();
-            default:
+    public boolean loopYesNo() {
+
+        while (true) {
+            String choice = textUI.stringInput("Fortsæt registrering? (J/N)");
+
+            if (choice == null || choice.trim().isEmpty()) {
                 textUI.displayMsg("Vælg (J/N)");
+                continue;
+            }
+            char cleanChoice = choice.toUpperCase().charAt(0);
+            switch (cleanChoice) {
+                case 'J': {
+                    return true;
+                }
+                case 'N': {
+                    return false;
+                }
+                default: {
+                    textUI.displayMsg("Vælg (J/N)");
+                }
+            }
         }
-        return false;
     }
 
     private int chooseMonth() {
@@ -47,21 +64,32 @@ public class GameState {
 
     }
 
-    private void doContinue() {
+    private void calcAmount() {
         int i = calcSeason();
         int t = Integer.parseInt(textUI.stringInput("Antal cykelture:"));
         bc.addToTotal(i * t);
         bc.addTrips(t);
-        continueRegister();
+        textUI.displayMsg("Klimarabat for " + bc.getCurrentMonth() + ": " + String.valueOf(bc.getTotalAmount()) + "kr");
     }
-    private boolean calcSession(){
-        int carbonDioxid = (int) (bc.getBikeTrips()*2.6);
-        String tree = ""+carbonDioxid/20;
-       String s =""+ bc.getTotalAmount();
 
-        textUI.displayMsg("Flot arbejde! Du har sparet klimaet for " + String.valueOf(carbonDioxid)+ "kg CO2 (svarende til "+ tree + " træer)"
-        , "Din klimarabat: " + s+"kr overførers til din NemKonto!");
-        return false;
+    private void calcSession() {
+        int carbonDioxid = (int) (bc.getBikeTrips() * 2.6);
+        int ent = carbonDioxid / 20;
+        String tree = "" + ent;
+        String s = "" + bc.getTotalAmount();
+        switch (ent) {
+            case 0: {
+                textUI.displayMsg("Flot arbejde! Du har sparet klimaet for " + String.valueOf(carbonDioxid) + "kg CO2), desværre var det ikke engang et helt træs værd af CO2", "Din klimarabat: " + s + "kr overførers til din NemKonto!");
+            }
+            case 1: {
+                textUI.displayMsg("Flot arbejde! Du har sparet klimaet for " + String.valueOf(carbonDioxid) + "kg CO2 (svarende til " + tree + " træ)"
+                        , "Din klimarabat: " + s + "kr overførers til din NemKonto!");
+            }
+            default: {
+                textUI.displayMsg("Flot arbejde! Du har sparet klimaet for " + String.valueOf(carbonDioxid) + "kg CO2 (svarende til " + tree + " træer)"
+                        , "Din klimarabat: " + s + "kr overførers til din NemKonto!");
+            }
+        }
 
     }
 
